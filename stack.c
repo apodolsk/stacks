@@ -116,7 +116,7 @@ stack (lfstack_pop_all)(cnt incr, lfstack *s){
     }
 }
 
-stack lfstack_pop_all_or_incr(cnt incr, lfstack *s){
+stack (lfstack_pop_all_or_incr)(cnt incr, lfstack *s){
     for(lfstack x = *s;;){
         if(!x.top){
             if(cas2_won(rup(x, .gen += incr), s, &x))

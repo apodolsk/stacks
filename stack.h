@@ -65,3 +65,6 @@ sanchor *sanchor_next(sanchor *a);
 #define stack_pop(as...) trace(STACKM, 1, stack_pop, as)
 #define stack_push(as...) trace(STACKM, 1, stack_push, as)
 
+#ifndef LOG_STACKM
+#define LOG_STACKM 1
+#endif
