@@ -42,9 +42,9 @@ cnt (lfstack_push)(sanchor *a, lfstack *s){
     return lfstack_push_spanc(a, s, (void (*)(spanc *, spanc *)) sanc_write);
 }
 
-cnt (lfstack_push_spanc)(spanc *a, lfstack *s, void (spanc_write)(spanc *, spanc *)){
+cnt (lfstack_push_spanc)(spanc *a, lfstack *s, spanc_writer *w){
     for(lfstack x = *s;;){
-        spanc_write(x.top, a);
+        w(x.top, a);
         if(cas2_won(rup(x, .top=a), s, &x))
             return x.gen;
     }
@@ -57,11 +57,11 @@ sanchor *(lfstack_pop)(lfstack *s){
     return a;
 }
 
-spanc *(lfstack_pop_spanc)(lfstack *s, spanc *(spanc_read)(spanc *)){
+spanc *(lfstack_pop_spanc)(lfstack *s, spanc_reader *r){
     for(lfstack x = *s;;){
         if(!x.top)
             return NULL;
-        if(cas2_won(rup(x, .top=spanc_read(x.top), .gen++), s, &x)){
+        if(cas2_won(rup(x, .top=r(x.top), .gen++), s, &x)){
             return x.top;
         }
     }
