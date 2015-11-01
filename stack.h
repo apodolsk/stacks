@@ -46,8 +46,8 @@ lfstack lfstack_pop_all_iff(uptr newg, lfstack *s, uptr oldg);
 stack lfstack_convert(lfstack *s);
 
 typedef volatile void spanc;
-typedef spanc *(spanc_reader)(spanc *);
-typedef void (spanc_writer)(spanc *, spanc *);
+typedef spanc *(spanc_reader)(spanc *from);
+typedef void (spanc_writer)(spanc *p, spanc *to);
 cnt lfstack_push_spanc(spanc *a, lfstack *s, spanc_writer *w);
 spanc *lfstack_pop_spanc(lfstack *s, spanc_reader *r);
 
