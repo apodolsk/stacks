@@ -21,18 +21,20 @@ sanchor *(stack_pop)(stack *s){
     return t;
 }
 
+sanchor *stack_peek(const stack *s){
+    return s->top;
+}
+
 sanchor *sanchor_next(sanchor *a){
     return a->n;
 }
 
-bool stack_empty(const stack *s){
-    return !s->top;
-}
-
+static
 sanchor *sanc_read(sanchor *a){
     return a->n;
 }
 
+static
 void sanc_write(sanchor *n, sanchor *to){
     to->n = n;
 }
@@ -42,19 +44,19 @@ cnt (lfstack_push)(sanchor *a, lfstack *s){
     return lfstack_push_spanc(a, s, (void (*)(spanc *, spanc *)) sanc_write);
 }
 
+sanchor *(lfstack_pop)(lfstack *s){
+    sanchor *a = lfstack_pop_spanc(s, (spanc *(*)(spanc *)) sanc_read);
+    if(a)
+        a->n = NULL;
+    return a;
+}
+
 cnt (lfstack_push_spanc)(spanc *a, lfstack *s, spanc_writer *w){
     for(lfstack x = *s;;){
         w(x.top, a);
         if(cas2_won(rup(x, .top=a), s, &x))
             return x.gen;
     }
-}
-
-sanchor *(lfstack_pop)(lfstack *s){
-    sanchor *a = lfstack_pop_spanc(s, (spanc *(*)(spanc *)) sanc_read);
-    if(a)
-        a->n = NULL;
-    return a;
 }
 
 spanc *(lfstack_pop_spanc)(lfstack *s, spanc_reader *r){
@@ -92,7 +94,7 @@ sanchor *lfstack_peek(const lfstack *s){
     return s->top;
 }
 
-stack lfstack_convert(lfstack *s){
+stack lfstack_convert(const lfstack *s){
     return (stack){s->top};
 }
 
@@ -116,22 +118,12 @@ stack (lfstack_pop_all)(cnt incr, lfstack *s){
     }
 }
 
-stack (lfstack_pop_all_or_incr)(cnt incr, lfstack *s){
-    for(lfstack x = *s;;){
-        if(!x.top){
-            if(cas2_won(rup(x, .gen += incr), s, &x))
-                return lfstack_convert(&x);
-        }else if(cas2_won(rup(x, .top=NULL), s, &x))
-            return lfstack_convert(&x);
-    }
+bool (lfstack_clear_cas_won)(uptr ngen, lfstack *s, struct lfstack *o){
+    return cas2_won(((lfstack){.top=NULL, .gen=ngen}), s, o);
 }
 
-lfstack (lfstack_pop_all_iff)(uptr newg, lfstack *s, uptr oldg){
-    for(lfstack x = *s;;){
-        if(x.gen != oldg)
-            return x;
-        if(cas2_won(rup(x, .top=NULL, .gen=newg), s, &x))
-            return x;
-    }
+bool (lfstack_push_upd_won)(sanchor *a, uptr ngen, lfstack *s, struct lfstack *o){
+    a->n = o->top;
+    return upd2_won(((lfstack){.top=a, .gen=ngen}), s, o);
 }
 

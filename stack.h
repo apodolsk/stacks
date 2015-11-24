@@ -11,13 +11,10 @@ typedef volatile struct stack{
     sanchor *top;
 } stack;
 #define STACK {}
-#define pudef (stack, "(stack){top:%}", a->top)
-#include <pudef.h>
 
 sanchor *stack_pop(stack *s);
 void stack_push(sanchor *a, stack *s);
-cnt stack_size(const stack *s);
-bool stack_empty(const stack *s);
+sanchor *stack_peek(const stack *s);
 
 align(sizeof(dptr))
 typedef volatile struct lfstack{
@@ -25,10 +22,6 @@ typedef volatile struct lfstack{
     uptr gen;
 } lfstack;
 #define LFSTACK {}
-#define GEN_LFSTACK(_gen) {.gen = _gen}
-#define pudef (lfstack, "(lfstack){top:%,gen:%}", a->top, a->gen)
-#include <pudef.h>
-
 
 uptr lfstack_push(sanchor *a, lfstack *s);
 sanchor *lfstack_pop(lfstack *s);
@@ -38,12 +31,14 @@ uptr lfstack_gen(const lfstack *s);
 bool lfstack_empty(const lfstack *s);
 sanchor *lfstack_peek(const lfstack *s);
 
+bool lfstack_clear_cas_won(uptr ngen, lfstack *s, struct lfstack *os);
+bool lfstack_push_upd_won(sanchor *a, uptr ngen, lfstack *s, struct lfstack *os);
+
 uptr lfstack_push_iff(sanchor *a, uptr gen, lfstack *s);
 sanchor *lfstack_pop_iff(sanchor *head, uptr gen, lfstack *s);
-stack lfstack_pop_all_or_incr(cnt incr, lfstack *s);
 lfstack lfstack_pop_all_iff(uptr newg, lfstack *s, uptr oldg);
 
-stack lfstack_convert(lfstack *s);
+stack lfstack_convert(const lfstack *s);
 
 typedef volatile void spanc;
 typedef spanc *(spanc_reader)(spanc *from);
@@ -52,6 +47,17 @@ cnt lfstack_push_spanc(spanc *a, lfstack *s, spanc_writer *w);
 spanc *lfstack_pop_spanc(lfstack *s, spanc_reader *r);
 
 sanchor *sanchor_next(sanchor *a);
+
+#define pudef (stack, "(stack){top:%}", a->top)
+#include <pudef.h>
+#define pudef (lfstack, "(lfstack){top:%,gen:%}", a->top, a->gen)
+#include <pudef.h>
+
+#define lfstack_clear_cas_won(ngen, s, os)                          \
+    trace(STACKM, 1, lfstack_clear_cas_won, PUN(uptr, ngen), s, os)
+#define lfstack_push_upd_won(a, ngen, s, os)                    \
+    trace(STACKM, 1, lfstack_push_upd_won, a, PUN(uptr, ngen), s, os)
+
 
 #define lfstack_push(as...) trace(STACKM, 1, lfstack_push, as)
 #define lfstack_pop(as...) trace(STACKM, 1, lfstack_pop, as)
