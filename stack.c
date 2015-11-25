@@ -82,8 +82,33 @@ sanchor *(lfstack_pop_iff)(sanchor *head, uptr gen, lfstack *s){
     }
 }
 
-bool lfstack_empty(const lfstack *s){
-    return !s->top;
+uptr (lfstack_push_iff)(sanchor *a, uptr gen, lfstack *s){
+    for(lfstack x = *s;;){
+        if(x.gen != gen)
+            return x.gen;
+        a->n = x.top;
+        if(cas2_won(rup(x, .top = a), s, &x))
+            return x.gen;
+    }
+}
+
+bool (lfstack_clear_cas_won)(uptr ngen, lfstack *s, struct lfstack *o){
+    return cas2_won(((lfstack){.top=NULL, .gen=ngen}), s, o);
+}
+
+bool (lfstack_push_upd_won)(sanchor *a, uptr ngen, lfstack *s, struct lfstack *o){
+    a->n = o->top;
+    return upd2_won(((lfstack){.top=a, .gen=ngen}), s, o);
+}
+
+/* Callers can avoid gen updates if they only ever pop_all from s, or can
+   arrange for it to communicate something extra. */
+stack (lfstack_clear)(cnt incr, lfstack *s){
+    for(lfstack x = *s;;){
+        if((!x.top && !incr)
+           || cas2_won(rup(x, .top=NULL, .gen+=incr), s, &x))
+            return lfstack_convert(&x);
+    }
 }
 
 uptr lfstack_gen(const lfstack *s){
@@ -96,34 +121,5 @@ sanchor *lfstack_peek(const lfstack *s){
 
 stack lfstack_convert(const lfstack *s){
     return (stack){s->top};
-}
-
-uptr (lfstack_push_iff)(sanchor *a, uptr gen, lfstack *s){
-    for(lfstack x = *s;;){
-        if(x.gen != gen)
-            return x.gen;
-        a->n = x.top;
-        if(cas2_won(rup(x, .top = a), s, &x))
-            return x.gen;
-    }
-}
-
-/* Callers can avoid gen updates if they only ever pop_all from s, or can
-   arrange for it to communicate something extra. */
-stack (lfstack_pop_all)(cnt incr, lfstack *s){
-    for(lfstack x = *s;;){
-        if((!x.top && !incr)
-           || cas2_won(rup(x, .top=NULL, .gen+=incr), s, &x))
-            return lfstack_convert(&x);
-    }
-}
-
-bool (lfstack_clear_cas_won)(uptr ngen, lfstack *s, struct lfstack *o){
-    return cas2_won(((lfstack){.top=NULL, .gen=ngen}), s, o);
-}
-
-bool (lfstack_push_upd_won)(sanchor *a, uptr ngen, lfstack *s, struct lfstack *o){
-    a->n = o->top;
-    return upd2_won(((lfstack){.top=a, .gen=ngen}), s, o);
 }
 
