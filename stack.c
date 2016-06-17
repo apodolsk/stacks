@@ -52,7 +52,7 @@ sanchor *(lfstack_pop)(lfstack *s){
 }
 
 cnt (lfstack_push_spanc)(spanc *a, lfstack *s, spanc_writer *w){
-    for(lfstack x = *s;;){
+    for(struct lfstack x = *s;;){
         w(x.top, a);
         if(cas2_won(rup(x, .top=a), s, &x))
             return x.gen;
@@ -60,7 +60,7 @@ cnt (lfstack_push_spanc)(spanc *a, lfstack *s, spanc_writer *w){
 }
 
 spanc *(lfstack_pop_spanc)(lfstack *s, spanc_reader *r){
-    for(lfstack x = *s;;){
+    for(struct lfstack x = *s;;){
         if(!x.top)
             return NULL;
         if(cas2_won(rup(x, .top=r(x.top), .gen++), s, &x)){
@@ -72,7 +72,7 @@ spanc *(lfstack_pop_spanc)(lfstack *s, spanc_reader *r){
 sanchor *(lfstack_pop_iff)(sanchor *head, uptr gen, lfstack *s){
     if(!head)
         return NULL;
-    for(lfstack x = *s;;){
+    for(struct lfstack x = *s;;){
         if(x.top != head || x.gen != gen)
             return NULL;
         if(cas2_won(rup(x, .top=x.top->n, .gen++), s, &x)){
@@ -83,7 +83,7 @@ sanchor *(lfstack_pop_iff)(sanchor *head, uptr gen, lfstack *s){
 }
 
 uptr (lfstack_push_iff)(sanchor *a, uptr gen, lfstack *s){
-    for(lfstack x = *s;;){
+    for(struct lfstack x = *s;;){
         if(x.gen != gen)
             return x.gen;
         a->n = x.top;
@@ -104,7 +104,7 @@ bool (lfstack_push_upd_won)(sanchor *a, uptr ngen, lfstack *s, struct lfstack *o
 /* Callers can avoid gen updates if they only ever pop_all from s, or can
    arrange for it to communicate something extra. */
 stack (lfstack_clear)(cnt incr, lfstack *s){
-    for(lfstack x = *s;;){
+    for(struct lfstack x = *s;;){
         if((!x.top && !incr)
            || cas2_won(rup(x, .top=NULL, .gen+=incr), s, &x))
             return lfstack_convert(&x);
