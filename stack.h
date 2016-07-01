@@ -47,9 +47,9 @@ spanc *lfstack_pop_spanc(lfstack *s, spanc_reader *r);
 
 sanchor *sanchor_next(sanchor *a);
 
-#define pudef (stack, "(stack){top:%}", a->top)
+#define pudef (struct stack, "(stack){top:%}", a->top)
 #include <pudef.h>
-#define pudef (lfstack, "(lfstack){top:%,gen:%}", a->top, a->gen)
+#define pudef (struct lfstack, "(lfstack){top:%,gen:%}", a->top, a->gen)
 #include <pudef.h>
 
 #define lfstack_clear_cas_won(ngen, s, os)                          \
