@@ -26,7 +26,7 @@ typedef volatile struct lfstack{
 
 uptr lfstack_push(sanchor *a, lfstack *s);
 sanchor *lfstack_pop(lfstack *s);
-stack lfstack_clear(cnt incr, lfstack *s);
+struct stack lfstack_clear(cnt incr, lfstack *s);
 
 uptr lfstack_gen(const lfstack *s);
 sanchor *lfstack_peek(const lfstack *s);
@@ -37,7 +37,7 @@ bool lfstack_push_upd_won(sanchor *a, uptr ngen, lfstack *s, struct lfstack *os)
 uptr lfstack_push_iff(sanchor *a, uptr gen, lfstack *s);
 sanchor *lfstack_pop_iff(sanchor *head, uptr gen, lfstack *s);
 
-stack lfstack_convert(const lfstack *s);
+struct stack lfstack_convert(const lfstack *s);
 
 typedef volatile void spanc;
 typedef spanc *(spanc_reader)(spanc *from);

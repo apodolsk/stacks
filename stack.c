@@ -103,7 +103,7 @@ bool (lfstack_push_upd_won)(sanchor *a, uptr ngen, lfstack *s, struct lfstack *o
 
 /* Callers can avoid gen updates if they only ever pop_all from s, or can
    arrange for it to communicate something extra. */
-stack (lfstack_clear)(cnt incr, lfstack *s){
+struct stack (lfstack_clear)(cnt incr, lfstack *s){
     for(struct lfstack x = *s;;){
         if((!x.top && !incr)
            || cas2_won(rup(x, .top=NULL, .gen+=incr), s, &x))
@@ -119,7 +119,7 @@ sanchor *lfstack_peek(const lfstack *s){
     return s->top;
 }
 
-stack lfstack_convert(const lfstack *s){
+struct stack lfstack_convert(const lfstack *s){
     return (stack){s->top};
 }
 
