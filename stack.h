@@ -16,11 +16,11 @@ sanchor *stack_pop(stack *s);
 void stack_push(sanchor *a, stack *s);
 sanchor *stack_peek(const stack *s);
 
-align(sizeof(dptr))
-typedef volatile struct lfstack{
+typedef volatile 
+struct lfstack{
     sanchor *top;
     uptr gen;
-} lfstack;
+} align(sizeof(dptr)) lfstack;
 #define LFSTACK {}
 #define GEN_LFSTACK(_gen) {.gen=_gen}
 
