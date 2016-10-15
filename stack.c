@@ -1,7 +1,6 @@
 #define MODULE STACKM
 
 #include <stack.h>
-                  
 
 void (stack_push)(sanchor *a, stack *s){
     assert(!a->n);
@@ -39,6 +38,14 @@ void sanc_write(sanchor *n, sanchor *to){
     to->n = n;
 }
 
+struct lfstack lfstack_read(lfstack *s){
+    lfstack r;
+    r.gen = s->gen;
+    fuzz_atomics();
+    r.top = s->top;
+    return r;
+}
+
 cnt (lfstack_push)(sanchor *a, lfstack *s){
     assert(!a->n);
     return lfstack_push_spanc(a, s, (void (*)(spanc *, spanc *)) sanc_write);
@@ -60,7 +67,7 @@ cnt (lfstack_push_spanc)(spanc *a, lfstack *s, spanc_writer *w){
 }
 
 spanc *(lfstack_pop_spanc)(lfstack *s, spanc_reader *r){
-    for(struct lfstack x = *s;;){
+    for(struct lfstack x = lfstack_read(s);;){
         if(!x.top)
             return NULL;
         if(cas2_won(rup(x, .top=r(x.top), .gen++), s, &x)){
@@ -72,7 +79,7 @@ spanc *(lfstack_pop_spanc)(lfstack *s, spanc_reader *r){
 sanchor *(lfstack_pop_iff)(sanchor *head, uptr gen, lfstack *s){
     if(!head)
         return NULL;
-    for(struct lfstack x = *s;;){
+    for(struct lfstack x = lfstack_read(s);;){
         if(x.top != head || x.gen != gen)
             return NULL;
         if(cas2_won(rup(x, .top=x.top->n, .gen++), s, &x)){

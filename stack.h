@@ -24,6 +24,8 @@ struct lfstack{
 #define LFSTACK {}
 #define GEN_LFSTACK(_gen) {.gen=_gen}
 
+struct lfstack lfstack_read(lfstack *s);
+
 uptr lfstack_push(sanchor *a, lfstack *s);
 sanchor *lfstack_pop(lfstack *s);
 struct stack lfstack_clear(cnt incr, lfstack *s);
