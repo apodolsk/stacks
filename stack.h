@@ -1,7 +1,5 @@
 #pragma once
 
-#include <dial_util.h>
-
 typedef volatile struct sanchor{
     volatile struct sanchor *n;
 } sanchor;
