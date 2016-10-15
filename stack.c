@@ -50,11 +50,11 @@ sanchor *(lfstack_pop)(lfstack *s){
     return a;
 }
 
-/* When reading s to prepare for popping s, bad read ordering can bring
-   out ABA despite the use of version counts. In particular, if you read t
-   := s->top and n := t->n before s->gen, then it can be that t is popped
-   and pushed just before the s->gen read. Your CAS will succeed even
-   though t->n != n. */
+/* When reading s in lfstack_pop(), bad read ordering can bring out ABA
+   despite the use of version counts. In particular, if you read t :=
+   s->top and n := t->n before s->gen, then it can be that t is popped and
+   pushed just before the s->gen read. Your CAS will succeed even though
+   t->n != n. */
 struct lfstack lfstack_read(lfstack *s){
     lfstack r;
     r.gen = s->gen;
