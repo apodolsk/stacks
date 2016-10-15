@@ -83,9 +83,12 @@ sanchor *(lfstack_pop_iff)(sanchor *head, uptr gen, lfstack *s){
 }
 
 uptr (lfstack_push_iff)(sanchor *a, uptr gen, lfstack *s){
+    assert(!a->n);
     for(struct lfstack x = *s;;){
-        if(x.gen != gen)
+        if(x.gen != gen){
+            a->n = NULL;
             return x.gen;
+        }
         a->n = x.top;
         if(cas2_won(rup(x, .top = a), s, &x))
             return x.gen;
@@ -96,9 +99,13 @@ bool (lfstack_clear_cas_won)(uptr ngen, lfstack *s, struct lfstack *o){
     return cas2_won(((lfstack){.top=NULL, .gen=ngen}), s, o);
 }
 
-bool (lfstack_push_upd_won)(sanchor *a, uptr ngen, lfstack *s, struct lfstack *o){
+bool (lfstack_push_cas_won)(sanchor *a, uptr ngen, lfstack *s, struct lfstack *o){
+    assert(!a->n);
     a->n = o->top;
-    return upd2_won(((lfstack){.top=a, .gen=ngen}), s, o);
+    bool won = cas2_won(((lfstack){.top=a, .gen=ngen}), s, o);
+    if(!won)
+        a->n = NULL;
+    return won;
 }
 
 /* Callers can avoid gen updates if they only ever pop_all from s, or can

@@ -32,7 +32,7 @@ uptr lfstack_gen(const lfstack *s);
 sanchor *lfstack_peek(const lfstack *s);
 
 bool lfstack_clear_cas_won(uptr ngen, lfstack *s, struct lfstack *os);
-bool lfstack_push_upd_won(sanchor *a, uptr ngen, lfstack *s, struct lfstack *os);
+bool lfstack_push_cas_won(sanchor *a, uptr ngen, lfstack *s, struct lfstack *os);
 
 uptr lfstack_push_iff(sanchor *a, uptr gen, lfstack *s);
 sanchor *lfstack_pop_iff(sanchor *head, uptr gen, lfstack *s);
@@ -54,8 +54,8 @@ sanchor *sanchor_next(sanchor *a);
 
 #define lfstack_clear_cas_won(ngen, s, os)                          \
     trace(STACKM, 1, lfstack_clear_cas_won, PUN(uptr, ngen), s, os)
-#define lfstack_push_upd_won(a, ngen, s, os)                    \
-    trace(STACKM, 1, lfstack_push_upd_won, a, PUN(uptr, ngen), s, os)
+#define lfstack_push_cas_won(a, ngen, s, os)                    \
+    trace(STACKM, 1, lfstack_push_cas_won, a, PUN(uptr, ngen), s, os)
 
 
 #define lfstack_push(as...) trace(STACKM, 1, lfstack_push, as)
